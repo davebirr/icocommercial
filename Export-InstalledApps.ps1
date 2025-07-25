@@ -14,10 +14,7 @@ param(
     [switch]$IncludeSystemComponents,
     
     [Parameter(Mandatory = $false)]
-    [switch]$IncludeUpdates,
-    
-    [Parameter(Mandatory = $false)]
-    [switch]$Verbose
+    [switch]$IncludeUpdates
 )
 
 function Write-Log {
