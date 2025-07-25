@@ -20,10 +20,15 @@ A PowerShell toolkit for comparing installed applications between two Windows co
 | `Export-InstalledApps.ps1` | Exports installed applications from a computer |
 | `Compare-InstalledApps.ps1` | Compares application lists from two computers |
 | `Start-AppComparison.ps1` | Simplified workflow script for complete comparison |
-| `Export-RemoteInstalledApps.ps1` | **NEW**: Exports apps from remote computers using local credentials |
-| `Start-NetworkAppComparison.ps1` | **NEW**: Network-wide comparison workflow with remote support |
-| `New-MarkdownReport.ps1` | **NEW**: Generates professional Markdown reports |
-| `New-DirectorySummary.ps1` | **NEW**: Creates comprehensive directory overview reports |
+| `Export-RemoteInstalledApps.ps1` | Exports apps from remote computers using local credentials |
+| `Start-NetworkAppComparison.ps1` | Network-wide comparison workflow with remote support |
+| `Export-OfficeSettings.ps1` | **NEW**: Exports Microsoft Office settings, templates, and signatures |
+| `Export-PrinterSettings.ps1` | **NEW**: Exports printer configurations and preferences |
+| `Export-WiFiProfiles.ps1` | **NEW**: Exports WiFi network profiles with optional passwords |
+| `Export-WindowsPersonalization.ps1` | **NEW**: Exports desktop, taskbar, and theme settings |
+| `Export-UserProfile.ps1` | **NEW**: Comprehensive user profile export (all categories) |
+| `New-MarkdownReport.ps1` | Generates professional Markdown reports |
+| `New-DirectorySummary.ps1` | Creates comprehensive directory overview reports |
 | `README.md` | This documentation file |
 
 ## Quick Start
@@ -369,6 +374,81 @@ The scripts collect application data from multiple sources:
 - No sensitive data is collected (passwords, user data, etc.)
 - Registry access requires appropriate permissions
 - Consider data privacy when sharing export files
+
+```
+
+## 🎯 User Profile Migration
+
+This toolkit now includes comprehensive user profile migration capabilities, perfect for setting up new computers with personalized settings.
+
+### Complete User Profile Export
+```powershell
+# Export everything for a complete user migration
+.\Export-UserProfile.ps1 -IncludeOfficeSettings -IncludePrinterSettings -IncludeWiFiProfiles -IncludePersonalization -GenerateReport
+```
+
+### Individual Category Exports
+
+#### Microsoft Office Settings
+```powershell
+# Export Office customizations, templates, and email signatures
+.\Export-OfficeSettings.ps1 -IncludeTemplates -IncludeSignatures
+```
+- ✅ Registry settings for all Office applications
+- ✅ Custom templates and themes
+- ✅ Email signatures and AutoCorrect entries
+- ✅ Ribbon customizations and Quick Access Toolbar
+- ✅ Add-ins and their configurations
+
+#### Printer Configurations
+```powershell
+# Export all printer settings and preferences
+.\Export-PrinterSettings.ps1 -IncludeDriverDetails
+```
+- ✅ Installed printers and default printer
+- ✅ Print preferences and paper settings
+- ✅ Printer ports and network connections
+- ✅ Driver information (optional)
+
+#### WiFi Network Profiles
+```powershell
+# Export WiFi profiles with passwords (requires admin rights)
+.\Export-WiFiProfiles.ps1 -IncludePasswords -ExportProfiles
+```
+- ✅ Saved WiFi networks and security settings
+- ✅ Network passwords (with admin privileges)
+- ✅ Connection preferences and auto-connect settings
+- ✅ Profile XML files for easy import
+
+#### Windows Personalization
+```powershell
+# Export desktop, taskbar, and visual preferences
+.\Export-WindowsPersonalization.ps1 -IncludeWallpaper -IncludeStartLayout
+```
+- ✅ Desktop wallpaper and theme settings
+- ✅ Taskbar configuration and pinned items
+- ✅ Start Menu layout and shortcuts
+- ✅ File Explorer preferences
+- ✅ Sound schemes and system sounds
+
+### Migration Workflow
+
+1. **Export from source computer:**
+   ```powershell
+   .\Export-UserProfile.ps1 -IncludeOfficeSettings -IncludePrinterSettings -IncludeWiFiProfiles -IncludePersonalization -IncludePasswords -GenerateReport
+   ```
+
+2. **Transfer files to target computer** using secure storage (USB drive, network share, etc.)
+
+3. **Review the generated summary report** to understand what was exported
+
+4. **Manually configure the new computer** using the exported settings as a reference
+
+### Security Notes
+- **WiFi passwords** require administrator privileges to export
+- **Exported files contain sensitive information** - store securely
+- **Registry settings** should be applied carefully to avoid system conflicts
+- **Office settings** may need adjustment for different Office versions
 
 ## Requirements
 
