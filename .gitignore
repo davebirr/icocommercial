@@ -1,0 +1,68 @@
+# PowerShell Application Comparison Toolkit - .gitignore
+
+# Output directories and generated reports
+AppComparison/
+NetworkAppComparison/
+RemoteExports/
+*.html
+*.json
+*.md
+!README.md
+!.github/copilot-instructions.md
+
+# PowerShell module cache
+*.psm1.cache
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Log files
+*.log
+
+# Credential files (if any)
+*.cred
+*.credential
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+$RECYCLE.BIN/
+
+# IDE files
+.vscode/settings.json
+.vscode/launch.json
+*.swp
+*.swo
+*~
+
+# Test outputs (but keep example files)
+Test*/
+TestResults/
+
+# Package manager files
+packages/
+node_modules/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# PsExec if downloaded
+psexec.exe
+PsExec64.exe
+
+# Compressed files
+*.zip
+*.rar
+*.7z
+*.tar.gz
