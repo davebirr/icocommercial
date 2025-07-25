@@ -70,24 +70,34 @@ function Get-SimilarityScore {
     # Check for substring matches
     if ($str1.Contains($str2) -or $str2.Contains($str1)) { return 80 }
     
-    # Calculate Levenshtein distance
-    $matrix = New-Object 'int[,]' ($str1.Length + 1), ($str2.Length + 1)
+    # Use a simpler similarity algorithm that's PowerShell compatible
+    $longer = if ($str1.Length -gt $str2.Length) { $str1 } else { $str2 }
+    $shorter = if ($str1.Length -gt $str2.Length) { $str2 } else { $str1 }
     
-    for ($i = 0; $i -le $str1.Length; $i++) { $matrix[$i, 0] = $i }
-    for ($j = 0; $j -le $str2.Length; $j++) { $matrix[0, $j] = $j }
+    if ($longer.Length -eq 0) { return 100 }
     
-    for ($i = 1; $i -le $str1.Length; $i++) {
-        for ($j = 1; $j -le $str2.Length; $j++) {
-            $cost = if ($str1[$i - 1] -eq $str2[$j - 1]) { 0 } else { 1 }
-            $matrix[$i, $j] = [Math]::Min([Math]::Min($matrix[$i - 1, $j] + 1, $matrix[$i, $j - 1] + 1), $matrix[$i - 1, $j - 1] + $cost)
+    # Calculate character matches at same positions
+    $matches = 0
+    for ($i = 0; $i -lt $shorter.Length; $i++) {
+        if ($i -lt $longer.Length -and $shorter[$i] -eq $longer[$i]) {
+            $matches++
         }
     }
     
-    $distance = $matrix[$str1.Length, $str2.Length]
-    $maxLength = [Math]::Max($str1.Length, $str2.Length)
-    $similarity = [Math]::Round((1 - ($distance / $maxLength)) * 100, 2)
+    # Add points for common substrings
+    $commonChars = 0
+    foreach ($char in $shorter.ToCharArray()) {
+        if ($longer.Contains($char)) {
+            $commonChars++
+        }
+    }
     
-    return $similarity
+    # Calculate similarity percentage
+    $positionScore = ($matches / $longer.Length) * 60
+    $charScore = ($commonChars / $longer.Length) * 40
+    $similarity = [Math]::Round($positionScore + $charScore, 2)
+    
+    return [Math]::Min(100, $similarity)
 }
 
 function Group-SimilarApplications {
