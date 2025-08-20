@@ -284,6 +284,94 @@
 				"clear": false
 			},
 			"problemMatcher": []
+		},
+		{
+			"label": "Directory Comparison Example",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"Example-DirectoryComparison.ps1"
+			],
+			"group": "test",
+			"isBackground": false,
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Compare Directory Structures",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$source = Read-Host 'Enter source directory path'; $target = Read-Host 'Enter target directory path'; .\\Compare-DirectoryStructures.ps1 -SourceDirectory $source -TargetDirectory $target -GenerateStructureReport -GenerateCSVForActions"
+			],
+			"group": "build",
+			"isBackground": false,
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Process Directory Actions (What-If)",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$csvPath = (Get-ChildItem -Path . -Filter 'DirectoryDifferences_Actions.csv' -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName; if ($csvPath) { .\\Process-DirectoryActions.ps1 -ActionCSVPath $csvPath -WhatIf } else { Write-Host 'No DirectoryDifferences_Actions.csv file found. Run directory comparison first.' -ForegroundColor Red }"
+			],
+			"group": "test",
+			"isBackground": false,
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Process Directory Actions (Execute)",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$csvPath = (Get-ChildItem -Path . -Filter 'DirectoryDifferences_Actions.csv' -Recurse | Sort-Object LastWriteTime -Descending | Select-Object -First 1).FullName; if ($csvPath) { $backup = Read-Host 'Enter backup directory path (or press Enter to skip backup)'; if ($backup) { .\\Process-DirectoryActions.ps1 -ActionCSVPath $csvPath -BackupDirectory $backup } else { .\\Process-DirectoryActions.ps1 -ActionCSVPath $csvPath } } else { Write-Host 'No DirectoryDifferences_Actions.csv file found. Run directory comparison first.' -ForegroundColor Red }"
+			],
+			"group": "build",
+			"isBackground": false,
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": true,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
 		}
 	]
 }

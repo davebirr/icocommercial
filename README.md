@@ -27,6 +27,9 @@ A PowerShell toolkit for comparing installed applications between two Windows co
 | `Export-WiFiProfiles.ps1` | **NEW**: Exports WiFi network profiles with optional passwords |
 | `Export-WindowsPersonalization.ps1` | **NEW**: Exports desktop, taskbar, and theme settings |
 | `Export-UserProfile.ps1` | **NEW**: Comprehensive user profile export (all categories) |
+| `Compare-DirectoryStructures.ps1` | **NEW**: Deep directory comparison for file migration analysis |
+| `Process-DirectoryActions.ps1` | **NEW**: Executes user-defined actions from directory comparison |
+| `Example-DirectoryComparison.ps1` | **NEW**: Complete workflow examples for directory migration |
 | `New-MarkdownReport.ps1` | Generates professional Markdown reports |
 | `New-DirectorySummary.ps1` | Creates comprehensive directory overview reports |
 | `README.md` | This documentation file |
@@ -425,6 +428,35 @@ This toolkit now includes comprehensive user profile migration capabilities, per
 # Export desktop, taskbar, and visual preferences
 .\Export-WindowsPersonalization.ps1 -IncludeWallpaper -IncludeStartLayout
 ```
+
+## 🔄 Directory Structure Comparison & Migration
+
+Perfect for users migrating between cloud storage services (Dropbox → OneDrive) or performing large file migrations.
+
+### Complete Directory Analysis & Migration
+```powershell
+# Analyze differences between two directory structures
+.\Compare-DirectoryStructures.ps1 -SourceDirectory "C:\Users\John\Dropbox" -TargetDirectory "C:\Users\John\OneDrive" -GenerateStructureReport -GenerateCSVForActions
+
+# Review CSV in Excel and mark actions (C=Copy, D=Delete, I=Ignore)
+
+# Execute actions safely with backup
+.\Process-DirectoryActions.ps1 -ActionCSVPath ".\DirectoryComparison_*\DirectoryDifferences_Actions.csv" -BackupDirectory "C:\MigrationBackup"
+```
+
+### Key Features
+- ✅ **Deep recursive scanning** with configurable depth limits
+- ✅ **Comprehensive file analysis** (size, dates, structure)
+- ✅ **User-controlled actions** via Excel-editable CSV
+- ✅ **Safety features** including backup and What-If mode
+- ✅ **Detailed reporting** with structure analysis and recommendations
+- ✅ **Performance optimization** for large directories
+
+### Example Workflow
+```powershell
+# Step 1: Run full directory comparison
+.\Example-DirectoryComparison.ps1
+```
 - ✅ Desktop wallpaper and theme settings
 - ✅ Taskbar configuration and pinned items
 - ✅ Start Menu layout and shortcuts
@@ -449,6 +481,121 @@ This toolkit now includes comprehensive user profile migration capabilities, per
 - **Exported files contain sensitive information** - store securely
 - **Registry settings** should be applied carefully to avoid system conflicts
 - **Office settings** may need adjustment for different Office versions
+
+## 📁 Directory Structure Analysis & Migration
+
+For users migrating between storage systems or analyzing file organization differences.
+
+### Compare-DirectoryStructures.ps1
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `SourceDirectory` | String | Required | Source directory path (e.g., Dropbox folder) |
+| `TargetDirectory` | String | Required | Target directory path (e.g., OneDrive folder) |
+| `OutputDirectory` | String | Auto-generated | Directory for output reports and CSV files |
+| `IncludeHiddenFiles` | Switch | False | Include hidden files and system files |
+| `MaxDepth` | Int | 0 (unlimited) | Maximum directory depth to scan |
+| `ExcludePatterns` | String[] | Empty | Patterns to exclude (e.g., "*.tmp", "Thumbs.db") |
+| `GenerateStructureReport` | Switch | False | Generate detailed directory structure report |
+| `GenerateCSVForActions` | Switch | False | Generate CSV for user actions |
+
+**Example:**
+```powershell
+.\Compare-DirectoryStructures.ps1 -SourceDirectory "C:\Users\John\Dropbox" -TargetDirectory "C:\Users\John\OneDrive" -ExcludePatterns @("*.tmp","*.log","Thumbs.db") -GenerateStructureReport -GenerateCSVForActions
+```
+
+### Process-DirectoryActions.ps1
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `ActionCSVPath` | String | Required | Path to CSV file with user actions |
+| `WhatIf` | Switch | False | Show what would be done without executing |
+| `BackupDirectory` | String | Empty | Directory to backup files before deletion |
+| `LogFile` | String | Auto-generated | Path for detailed operation log |
+| `Force` | Switch | False | Execute without confirmation prompts |
+
+**Example:**
+```powershell
+# Test first
+.\Process-DirectoryActions.ps1 -ActionCSVPath ".\DirectoryDifferences_Actions.csv" -WhatIf
+
+# Execute with backup
+.\Process-DirectoryActions.ps1 -ActionCSVPath ".\DirectoryDifferences_Actions.csv" -BackupDirectory "C:\Backup"
+```
+
+### Directory Migration Workflow
+
+1. **Analyze Directory Differences**
+   ```powershell
+   .\Compare-DirectoryStructures.ps1 -SourceDirectory "C:\OldLocation" -TargetDirectory "C:\NewLocation" -GenerateStructureReport -GenerateCSVForActions
+   ```
+
+2. **Review Generated Reports**
+   - **Structure Report**: `DirectoryStructureReport.md` - Overview and recommendations
+   - **Action CSV**: `DirectoryDifferences_Actions.csv` - Editable file list
+
+3. **Edit Actions in Excel/CSV Editor**
+   - Open `DirectoryDifferences_Actions.csv`
+   - Fill **Action** column with:
+     - **C** = Copy file from source to target
+     - **D** = Delete file (will be backed up)
+     - **I** = Ignore (do nothing)
+
+4. **Test Actions (Recommended)**
+   ```powershell
+   .\Process-DirectoryActions.ps1 -ActionCSVPath ".\DirectoryDifferences_Actions.csv" -WhatIf
+   ```
+
+5. **Execute Actions with Safety Backup**
+   ```powershell
+   .\Process-DirectoryActions.ps1 -ActionCSVPath ".\DirectoryDifferences_Actions.csv" -BackupDirectory "C:\MigrationBackup"
+   ```
+
+### Common Migration Scenarios
+
+#### Dropbox to OneDrive Migration
+```powershell
+# Full analysis excluding temporary files
+.\Compare-DirectoryStructures.ps1 `
+    -SourceDirectory "C:\Users\$env:USERNAME\Dropbox" `
+    -TargetDirectory "C:\Users\$env:USERNAME\OneDrive" `
+    -ExcludePatterns @("*.tmp", "*.log", "Thumbs.db", ".DS_Store") `
+    -IncludeHiddenFiles `
+    -GenerateStructureReport `
+    -GenerateCSVForActions
+```
+
+#### Large Directory Optimization
+```powershell
+# Limited depth for performance
+.\Compare-DirectoryStructures.ps1 `
+    -SourceDirectory "D:\LargeFolder" `
+    -TargetDirectory "E:\NewLocation" `
+    -MaxDepth 5 `
+    -ExcludePatterns @("*.iso", "*.zip", "node_modules") `
+    -GenerateStructureReport
+```
+
+### Understanding Results
+
+#### Status Types in CSV
+- **OnlyInSource**: File exists in source but missing from target
+- **OnlyInTarget**: File exists in target but not in source  
+- **SizeDifference**: Same file with different sizes
+- **TimeDifference**: Same file with different modification times
+
+#### Recommended Actions
+- **OnlyInSource** → **C** (Copy): Transfer missing files
+- **OnlyInTarget** → **D** or **I**: Delete extras or keep OneDrive-specific files
+- **SizeDifference** → **C**: Usually copy newer/larger version
+- **TimeDifference** → **I**: Often safe to ignore timestamp differences
+
+### Safety Features
+- **Automatic Backup**: All deleted files backed up before removal
+- **What-If Mode**: Test operations without making changes
+- **Detailed Logging**: Complete operation history with timestamps
+- **Structure Preservation**: Maintains directory hierarchy in backups
+- **Error Handling**: Graceful handling of access denied and missing files
 
 ## Requirements
 
