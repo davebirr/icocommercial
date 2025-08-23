@@ -126,7 +126,7 @@ function Get-ReconstructedSourcePath {
         [array]$AllActions
     )
     
-    # Try to find a valid source path to extract the base directory
+    # First, try to find a valid source path to extract the base directory
     $validEntry = $AllActions | Where-Object { -not [string]::IsNullOrWhiteSpace($_.SourcePath) } | Select-Object -First 1
     
     if ($validEntry) {
@@ -136,7 +136,44 @@ function Get-ReconstructedSourcePath {
         if ($basePath.EndsWith($relativePart)) {
             $sourceBasePath = $basePath.Substring(0, $basePath.Length - $relativePart.Length)
             $reconstructedPath = Join-Path $sourceBasePath $RelativePath
-            return $reconstructedPath
+            
+            # If the reconstructed path exists, return it
+            if (Test-Path $reconstructedPath) {
+                return $reconstructedPath
+            }
+            
+            # If the reconstructed path doesn't exist, try to find the file by name
+            $fileName = Split-Path $RelativePath -Leaf
+            Write-Host "Original path not found, searching for file: $fileName" -ForegroundColor Yellow
+            
+            # Look for entries in the CSV with the same filename that have valid source paths
+            $sameFileEntries = $AllActions | Where-Object { 
+                $_.Name -eq $fileName -and 
+                -not [string]::IsNullOrWhiteSpace($_.SourcePath)
+            }
+            
+            foreach ($entry in $sameFileEntries) {
+                if (Test-Path $entry.SourcePath -ErrorAction SilentlyContinue) {
+                    Write-Host "Found alternative source path for $fileName : $($entry.SourcePath)" -ForegroundColor Green
+                    return $entry.SourcePath
+                }
+            }
+            
+            # If still not found, try a broader search using Get-ChildItem
+            Write-Host "Performing broader search for: $fileName" -ForegroundColor Yellow
+            try {
+                $searchResult = Get-ChildItem -Path $sourceBasePath -Name $fileName -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+                if ($searchResult) {
+                    $foundPath = Join-Path $sourceBasePath $searchResult
+                    Write-Host "Found file via recursive search: $foundPath" -ForegroundColor Green
+                    return $foundPath
+                }
+            }
+            catch {
+                Write-Host "Recursive search failed: $($_.Exception.Message)" -ForegroundColor Red
+            }
+            
+            return $reconstructedPath  # Return the original attempt even if it doesn't exist
         }
     }
     
@@ -206,6 +243,24 @@ try {
         # Verify source file exists
         if (-not $WhatIf -and -not (Test-Path $sourcePath)) {
             Write-CopyLog "Source file not found: $sourcePath" "ERROR"
+            
+            # Try to find the file with a different approach
+            $parentDir = Split-Path $sourcePath -Parent
+            $fileName = Split-Path $sourcePath -Leaf
+            
+            if (Test-Path $parentDir) {
+                Write-CopyLog "Searching in directory: $parentDir" "INFO"
+                $foundFiles = Get-ChildItem -Path $parentDir -Filter "*$($fileName.Substring(0, [Math]::Min(10, $fileName.Length)))*" -ErrorAction SilentlyContinue
+                if ($foundFiles) {
+                    Write-CopyLog "Similar files found in directory:" "INFO"
+                    foreach ($file in $foundFiles) {
+                        Write-CopyLog "  - $($file.Name)" "INFO"
+                    }
+                }
+            } else {
+                Write-CopyLog "Parent directory also not found: $parentDir" "ERROR"
+            }
+            
             $stats.Failed++
             continue
         }
