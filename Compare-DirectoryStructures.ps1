@@ -144,6 +144,9 @@ function Get-DirectoryAnalysis {
             
             $relativePath = $item.FullName.Substring($Path.Length + 1)
             
+            # Normalize the relative path for consistent comparison
+            $relativePath = $relativePath.Replace('/', '\').Trim('\')
+            
             if ($item.PSIsContainer) {
                 $directories += [PSCustomObject]@{
                     Type = "Directory"
