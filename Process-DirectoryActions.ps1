@@ -208,7 +208,30 @@ function Invoke-Actions {
             "C" {
                 # Copy operation
                 if ($action.Status -eq "OnlyInSource") {
-                    $success = Copy-FileWithStructure -SourcePath $action.SourcePath -DestinationPath $action.TargetPath -IsWhatIf $IsWhatIf
+                    # Handle missing source path by reconstructing it
+                    $sourcePath = $action.SourcePath
+                    if ([string]::IsNullOrWhiteSpace($sourcePath)) {
+                        # Try to reconstruct source path from a valid example
+                        $validEntry = $actions | Where-Object { -not [string]::IsNullOrWhiteSpace($_.SourcePath) } | Select-Object -First 1
+                        if ($validEntry) {
+                            # Extract base path from valid entry
+                            $basePath = $validEntry.SourcePath
+                            $relativePart = $validEntry.RelativePath
+                            if ($basePath.EndsWith($relativePart)) {
+                                $sourceBasePath = $basePath.Substring(0, $basePath.Length - $relativePart.Length)
+                                $sourcePath = Join-Path $sourceBasePath $action.RelativePath
+                                Write-ActionLog "Reconstructed source path: $sourcePath" "INFO"
+                            }
+                        }
+                        
+                        if ([string]::IsNullOrWhiteSpace($sourcePath)) {
+                            Write-ActionLog "Cannot copy - source path is empty and cannot be reconstructed: $($action.RelativePath)" "ERROR"
+                            $stats.Failed++
+                            continue
+                        }
+                    }
+                    
+                    $success = Copy-FileWithStructure -SourcePath $sourcePath -DestinationPath $action.TargetPath -IsWhatIf $IsWhatIf
                     if ($success) { $stats.Copied++ } else { $stats.Failed++ }
                 }
                 elseif ($action.Status -like "*Difference") {
